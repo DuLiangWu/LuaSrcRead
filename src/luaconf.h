@@ -428,6 +428,16 @@
 @@ lua_str2number converts a decimal numeric string to a number.
 */
 
+/*
+l_mathlim(x)		给变量名增加一个前缀（平台不同前缀可能不同），去得到适合的浮点类型变量名
+LUA_NUMBER_FMT		c标准格式输出写floats时的格式
+lua_number2str		float转字符串
+l_mathop			数学操作(函数)重定向为有后缀的'f','l'的操作符(不同平台不同实现)，比如
+l_floor				使用l_mathop重定向floor函数，可能为floor,floorf,floorf,具体实现参见平台的不同
+lua_str2number		字符串转float
+以上宏的实现均与平台和相关预定义宏相关
+*/
+
 
 /* The following definitions are good for most cases here */
 
@@ -519,6 +529,13 @@
 @@ LUA_MININTEGER is the minimum value for a LUA_INTEGER.
 @@ lua_integer2str converts an integer to a string.
 */
+/*
+LUA_INTEGER				lua整形数据
+LUA_UNSIGNED			无符号
+LUA_INTEGER_FRMLEN		标准输入输出的整形格式的修饰符,"","l","ll",组合即("%d","%ld","lld")
+LUA_INTEGER_FMT			输出时的整形格式
+*/
+
 
 
 /* The following definitions are good for most cases here */
