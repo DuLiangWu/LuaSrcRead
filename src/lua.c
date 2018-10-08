@@ -614,7 +614,7 @@ int main( ) {
     int DBL_a = 10, DBL_10 = 100;
     int a = 10;
     printf( "%d\n", l_mathlim( a ) );
+    printf( "%d\n", LUA_REGISTRYINDEX );
 
     return 0;
 }
-
