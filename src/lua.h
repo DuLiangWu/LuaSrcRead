@@ -142,6 +142,7 @@ extern const char lua_ident[];
 /*
 ** state manipulation
 */
+/*虚拟机状态操作*/
 LUA_API lua_State *(lua_newstate) (lua_Alloc f, void *ud);
 LUA_API void       (lua_close) (lua_State *L);
 LUA_API lua_State *(lua_newthread) (lua_State *L);

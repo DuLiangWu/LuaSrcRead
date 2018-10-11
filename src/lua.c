@@ -610,11 +610,34 @@ int main1 (int argc, char **argv) {
   return (result && status == LUA_OK) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
+void __declspec(noreturn) ff( ) {
+    printf( "ff\n" );
+}
+
+int test( int a ) {
+
+    if( a == 0 ) {
+        printf( "hhh\n" );
+        return 0;
+    }
+    else {
+        int ww;
+        ff( );
+        printf( "ssss\n" );
+    }
+}
+
+#define lua_assert(c)		((void)0)
 int main( ) {
     int DBL_a = 10, DBL_10 = 100;
     int a = 10;
-    printf( "%d\n", l_mathlim( a ) );
-    printf( "%d\n", LUA_REGISTRYINDEX );
+    int *p_a = &a;
+    long long b = 10;
+    long long *p = &b;
+
+    int w = test( 1 );
+    //printf( "%d", test( 1 ) );
+    printf( "%f", sqrt( -1 ) );
 
     return 0;
 }

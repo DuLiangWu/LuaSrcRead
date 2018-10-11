@@ -32,6 +32,7 @@ typedef long l_mem;
 
 
 /* chars used as small naturals (so that 'char' is reserved for characters) */
+/*lua中类型字节，char为字符保留*/
 typedef unsigned char lu_byte;
 
 
@@ -55,6 +56,7 @@ typedef unsigned char lu_byte;
 ** conversion of pointer to unsigned integer:
 ** this is for hashing only; there is no problem if the integer
 ** cannot hold the whole pointer value
+* 为什么说64位指针转换为32位时没有问题
 */
 #define point2uint(p)	((unsigned int)((size_t)(p) & UINT_MAX))
 
@@ -81,6 +83,7 @@ typedef LUAI_UACINT l_uacInt;
 
 
 /* internal assertions for in-house debugging */
+/*如果有内部调试需求，需要自己定义断言assertion*/
 #if defined(lua_assert)
 #define check_exp(c,e)		(lua_assert(c), (e))
 /* to avoid problems with conditions too long */
@@ -108,6 +111,7 @@ typedef LUAI_UACINT l_uacInt;
 
 
 /* type casts (a macro highlights casts in the code) */
+/*类型转换，用宏高亮显示代码中的强制类型转换*/
 #define cast(t, exp)	((t)(exp))
 
 #define cast_void(i)	cast(void, (i))
@@ -134,6 +138,8 @@ typedef LUAI_UACINT l_uacInt;
 
 /*
 ** non-return type
+** 没有返回值的函数声明，这个属性告诉编译器函数不会返回，这可以用来抑制关于未达到代码路径的错误
+** 当遇到类似函数需要返回值而却不可能运行到返回值处就已经退出来的情况
 */
 #if defined(__GNUC__)
 #define l_noret		void __attribute__((noreturn))
@@ -148,6 +154,7 @@ typedef LUAI_UACINT l_uacInt;
 /*
 ** maximum depth for nested C calls and syntactical nested non-terminals
 ** in a program. (Value must fit in an unsigned short int.)
+** c嵌套调用的最大深度，以及非终端的语义嵌套？
 */
 #if !defined(LUAI_MAXCCALLS)
 #define LUAI_MAXCCALLS		200
@@ -158,6 +165,7 @@ typedef LUAI_UACINT l_uacInt;
 /*
 ** type for virtual-machine instructions;
 ** must be an unsigned with (at least) 4 bytes (see details in lopcodes.h)
+** 虚拟机指令类型，最小4个字节
 */
 #if LUAI_BITSINT >= 32
 typedef unsigned int Instruction;
@@ -171,6 +179,7 @@ typedef unsigned long Instruction;
 ** Maximum length for short strings, that is, strings that are
 ** internalized. (Cannot be smaller than reserved words or tags for
 ** metamethods, as these strings must be internalized;
+** 短字符串（内部使用）的最大长度，不能小于保留字或者用于元方法的标签的长度
 ** #("function") = 8, #("__newindex") = 10.)
 */
 #if !defined(LUAI_MAXSHORTLEN)
@@ -193,6 +202,7 @@ typedef unsigned long Instruction;
 ** Size of cache for strings in the API. 'N' is the number of
 ** sets (better be a prime) and "M" is the size of each set (M == 1
 ** makes a direct cache.)
+** strings的cache大小，STRCACHE_N 最好是素数
 */
 #if !defined(STRCACHE_N)
 #define STRCACHE_N		53
@@ -209,6 +219,9 @@ typedef unsigned long Instruction;
 /*
 ** macros that are executed whenever program enters the Lua core
 ** ('lua_lock') and leaves the core ('lua_unlock')
+** 进入lua core时会执行宏lua_lock，离开时执行lua_unlock，
+** 参考：https://stackoverflow.com/questions/3010974/purpose-of-lua-lock-and-lua-unlock
+** lua_unlock的先后顺序：http://lua-users.org/lists/lua-l/2007-06/msg00411.html
 */
 #if !defined(lua_lock)
 #define lua_lock(L)	((void) 0)
@@ -218,6 +231,7 @@ typedef unsigned long Instruction;
 /*
 ** macro executed during Lua functions at points where the
 ** function can yield.
+** 
 */
 #if !defined(luai_threadyield)
 #define luai_threadyield(L)	{lua_unlock(L); lua_lock(L);}
@@ -275,6 +289,7 @@ typedef unsigned long Instruction;
 ** 'a - trunc(a/b)*b', and therefore must be corrected when 'trunc(a/b)
 ** ~= floor(a/b)'. That happens when the division has a non-integer
 ** negative result, which is equivalent to the test below.
+** 取整的几种方法，floor(向下), Cellimg（向上）, Truncate（截断）:https://www.jianshu.com/p/452c1a5acd31
 */
 #if !defined(luai_nummod)
 #define luai_nummod(L,a,b,m)  \

@@ -156,6 +156,7 @@ typedef struct global_State {
 
 /*
 ** 'per thread' state
+** 单个lua线程（常见更常见的称呼是lua虚拟机，状态机）
 */
 struct lua_State {
   CommonHeader;

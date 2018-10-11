@@ -68,6 +68,7 @@
 
 /*
 ** Common type for all collectable objects
+** 所有可回收收集对象的通用标识类型
 */
 typedef struct GCObject GCObject;
 
@@ -75,6 +76,7 @@ typedef struct GCObject GCObject;
 /*
 ** Common Header for all collectable objects (in macro form, to be
 ** included in other objects)
+** 所有可回收收集对象必须包含这个宏定义的通用头（链表头）
 */
 #define CommonHeader	GCObject *next; lu_byte tt; lu_byte marked
 

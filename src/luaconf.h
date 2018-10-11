@@ -285,6 +285,13 @@
 #define LUAI_DDEC	LUAI_FUNC
 #define LUAI_DDEF	/* empty */
 
+/* LUA_API LUAI_DDEC 两个宏解释
+** win下导出的符号表是可以控制的，而Linux下是全部暴露的
+** 在win下如果不需要导出，函数声明时不加__declspec(dllexport),或者不在.def文件中定义
+** 而在linux下，使用gcc时，如果不想暴露，需要把函数加声明__attribute__((visibility("hidden"))) 
+** __declspec 与 __attribute__ 区别
+*/
+
 /* }================================================================== */
 
 
