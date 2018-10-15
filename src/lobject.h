@@ -15,7 +15,10 @@
 #include "llimits.h"
 #include "lua.h"
 
-
+/*
+lua似乎在常规的数据类型之外，还有一种衍生的tagged value，
+类型值的比特位（从零开始）4-5就是对应基本类型变种（衍生）类型
+*/
 /*
 ** Extra tags for non-values
 */
@@ -30,39 +33,58 @@
 
 /*
 ** tags for Tagged Values have the following use of bits:
-** bits 0-3: actual tag (a LUA_T* value)
-** bits 4-5: variant bits
-** bit 6: whether value is collectable
+** 比特位确定数据类型
+** bits 0-3: actual tag (a LUA_T* value)    比特位：0-3 实际LUA类型
+** bits 4-5: variant bits                   4-5：变种类型
+** bit 6: whether value is collectable      6：是否是可收集回收的值
 */
 
 
 /*
-** LUA_TFUNCTION variants:
+** LUA_TFUNCTION variants: lua函数的变种类型
 ** 0 - Lua function
 ** 1 - light C function
 ** 2 - regular C function (closure)
 */
 
 /* Variant tags for functions */
+/*
+*  LUA_TFUNCTION 6  0000 0110
+*  LUA_TLCL         0000 0110
+*  LUA_TLCF         0001 0110
+*  LUA_TCCL         0010 0110
+*/
 #define LUA_TLCL	(LUA_TFUNCTION | (0 << 4))  /* Lua closure */
 #define LUA_TLCF	(LUA_TFUNCTION | (1 << 4))  /* light C function */
 #define LUA_TCCL	(LUA_TFUNCTION | (2 << 4))  /* C closure */
 
 
 /* Variant tags for strings */
+/*
+*  LUA_TSTRING 4    0000 0100
+*  LUA_TSHRSTR      0000 0100
+*  LUA_TLNGSTR      0001 0100
+*/
 #define LUA_TSHRSTR	(LUA_TSTRING | (0 << 4))  /* short strings */
 #define LUA_TLNGSTR	(LUA_TSTRING | (1 << 4))  /* long strings */
 
 
 /* Variant tags for numbers */
+/*
+*  LUA_TNUMBER 3    0000 0011
+*  LUA_TNUMFLT      0000 0011
+*  LUA_TNUMINT      0001 0011
+*/
 #define LUA_TNUMFLT	(LUA_TNUMBER | (0 << 4))  /* float numbers */
 #define LUA_TNUMINT	(LUA_TNUMBER | (1 << 4))  /* integer numbers */
 
 
 /* Bit mark for collectable types */
+/* BIT_ISCOLLECTABLE 0100 0000 */
 #define BIT_ISCOLLECTABLE	(1 << 6)
 
 /* mark a tag as collectable */
+/* 将某个tag标记为可收集回收对象*/
 #define ctb(t)			((t) | BIT_ISCOLLECTABLE)
 
 
@@ -76,7 +98,9 @@ typedef struct GCObject GCObject;
 /*
 ** Common Header for all collectable objects (in macro form, to be
 ** included in other objects)
-** 所有可回收收集对象必须包含这个宏定义的通用头（链表头）
+** 所有可回收收集对象必须包含这个宏定义的通用头（有点像链表头？）
+** tt：？？？
+** marked:猜测用于标记数据类型，包括是否可回收
 */
 #define CommonHeader	GCObject *next; lu_byte tt; lu_byte marked
 
@@ -94,10 +118,12 @@ struct GCObject {
 /*
 ** Tagged Values. This is the basic representation of values in Lua,
 ** an actual value plus a tag with its type.
+** Tagged Value，实际值 加上 一个可以表达类型的tag（标签） 见宏 TValuefields
 */
 
 /*
 ** Union of all Lua values
+** lua所有值的联合体
 */
 typedef union Value {
   GCObject *gc;    /* collectable objects */
@@ -109,6 +135,7 @@ typedef union Value {
 } Value;
 
 
+/* Tagged value 的值域，包括值本身，和类型（一般是包含tag的类型）*/
 #define TValuefields	Value value_; int tt_
 
 
@@ -121,7 +148,7 @@ typedef struct lua_TValue {
 /* macro defining a nil value */
 #define NILCONSTANT	{NULL}, LUA_TNIL
 
-
+/* 获取object的值，原始类型，基本类型（未变种的类型），TValue,*/
 #define val_(o)		((o)->value_)
 
 
@@ -137,6 +164,9 @@ typedef struct lua_TValue {
 /* type tag of a TValue with no variants (bits 0-3) */
 #define ttnov(o)	(novariant(rttype(o)))
 
+/*
+* tag与ype区别，tag包含变种与基本类型，type
+*/
 
 /* Macros to test type */
 #define checktag(o,t)		(rttype(o) == (t))
@@ -162,6 +192,7 @@ typedef struct lua_TValue {
 
 
 /* Macros to access values */
+/*宏 访问值，gc相关的请参考Istae.h*/
 #define ivalue(o)	check_exp(ttisinteger(o), val_(o).i)
 #define fltvalue(o)	check_exp(ttisfloat(o), val_(o).n)
 #define nvalue(o)	check_exp(ttisnumber(o), \
