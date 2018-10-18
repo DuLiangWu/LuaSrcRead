@@ -124,6 +124,8 @@ struct GCObject {
 /*
 ** Union of all Lua values
 ** lua所有值的联合体
+** GCObject 是一个指针（注意指针本身是地址，可以进行类型强制转换），所以这个指针所指向的值和tt_有关
+也就是下文获取真实值的时候为什么要把GCObject*转换为GCUnion* 然后去获取真实的类型值
 */
 typedef union Value {
   GCObject *gc;    /* collectable objects */
@@ -218,8 +220,12 @@ typedef struct lua_TValue {
 
 
 /* Macros for internal tests */
+/* 内部测试数据 带标签的数据类型等于gc值的类型*/
 #define righttt(obj)		(ttype(obj) == gcvalue(obj)->tt)
 
+/* 检查对象是否存活
+** 如果 （不是一个可收集对象，或者是一个内部测试数据） 同时 （L==NULL或者是 没有dead的数据）
+*/
 #define checkliveness(L,obj) \
 	lua_longassert(!iscollectable(obj) || \
 		(righttt(obj) && (L == NULL || !isdead(G(L),gcvalue(obj)))))
@@ -332,6 +338,8 @@ typedef TValue *StkId;  /* index to stack elements */
 /*
 ** Header for string value; string bytes follow the end of this structure
 ** (aligned according to 'UTString'; see next).
+** 字符串的头结构，字符串的内容在这个结构体之后
+** 和UTString对齐
 */
 typedef struct TString {
   CommonHeader;
@@ -347,6 +355,7 @@ typedef struct TString {
 
 /*
 ** Ensures that address after this type is always fully aligned.
+** 为了确保UTString的地址总是对齐的，采用union
 */
 typedef union UTString {
   L_Umaxalign dummy;  /* ensures maximum alignment for strings */
@@ -357,6 +366,7 @@ typedef union UTString {
 /*
 ** Get the actual string (array of bytes) from a 'TString'.
 ** (Access to 'extra' ensures that value is really a 'TString'.)
+** 从TString中获取真实的stirng数据，加上UTString的大小偏移
 */
 #define getstr(ts)  \
   check_exp(sizeof((ts)->extra), cast(char *, (ts)) + sizeof(UTString))
@@ -372,6 +382,7 @@ typedef union UTString {
 #define vslen(o)	tsslen(tsvalue(o))
 
 
+/* userdata的头文件，已经相关set与get 设置与获取 */
 /*
 ** Header for userdata; memory area follows the end of this structure
 ** (aligned according to 'UUdata'; see next).
@@ -476,13 +487,14 @@ typedef struct UpVal UpVal;
 #define ClosureHeader \
 	CommonHeader; lu_byte nupvalues; GCObject *gclist
 
+/* c closure */
 typedef struct CClosure {
   ClosureHeader;
   lua_CFunction f;
   TValue upvalue[1];  /* list of upvalues */
 } CClosure;
 
-
+/* lua closure */
 typedef struct LClosure {
   ClosureHeader;
   struct Proto *p;
@@ -495,7 +507,7 @@ typedef union Closure {
   LClosure l;
 } Closure;
 
-
+/* 是否是lua 函数 */
 #define isLfunction(o)	ttisLclosure(o)
 
 #define getproto(o)	(clLvalue(o)->p)
@@ -505,6 +517,7 @@ typedef union Closure {
 ** Tables
 */
 
+/* 表的关键字*/
 typedef union TKey {
   struct {
     TValuefields;
@@ -521,6 +534,7 @@ typedef union TKey {
 	  (void)L; checkliveness(L,io_); }
 
 
+/* table中的节点 包含 key value */
 typedef struct Node {
   TValue i_val;
   TKey i_key;
@@ -532,11 +546,11 @@ typedef struct Table {
   lu_byte flags;  /* 1<<p means tagmethod(p) is not present */
   lu_byte lsizenode;  /* log2 of size of 'node' array */
   unsigned int sizearray;  /* size of 'array' array */
-  TValue *array;  /* array part */
-  Node *node;
+  TValue *array;  /* array part 数组部分 */
+  Node *node;   /* key value 部分*/
   Node *lastfree;  /* any free position is before this position */
-  struct Table *metatable;
-  GCObject *gclist;
+  struct Table *metatable;  /* 元表 */
+  GCObject *gclist; /* gc部分 */
 } Table;
 
 

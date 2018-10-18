@@ -627,17 +627,20 @@ int test( int a ) {
     }
 }
 
+#include <assert.h>
 #define lua_assert(c)		((void)0)
 int main( ) {
     int DBL_a = 10, DBL_10 = 100;
-    int a = 10;
+    int a = 0, e = 5, f = 1;
     int *p_a = &a;
     long long b = 10;
     long long *p = &b;
 
     int w = test( 1 );
     //printf( "%d", test( 1 ) );
-    printf( "%f", sqrt( -1 ) );
+    for( int i = 1; i < 10; ++i ) {
+        printf( "%d\t", rand( ) );
+    }
 
     return 0;
 }

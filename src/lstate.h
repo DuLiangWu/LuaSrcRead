@@ -63,13 +63,15 @@ typedef struct stringtable {
 
 
 /*
-** Information about a call.
+** Information about a call. 调用信息
 ** When a thread yields, 'func' is adjusted to pretend that the
 ** top function has only the yielded values in its stack; in that
 ** case, the actual 'func' value is saved in field 'extra'.
 ** When a function calls another with a continuation, 'extra' keeps
 ** the function index so that, in case of errors, the continuation
 ** function can be called with the correct top.
+当线程在产出时，'func'被调整为在栈中top function只在生产值。这种情况，实际的'func'值保存在'extra'字段
+
 */
 typedef struct CallInfo {
   StkId func;  /* function index in the stack */
@@ -119,10 +121,10 @@ typedef struct CallInfo {
 typedef struct global_State {
   lua_Alloc frealloc;  /* function to reallocate memory */
   void *ud;         /* auxiliary data to 'frealloc' */
-  l_mem totalbytes;  /* number of bytes currently allocated - GCdebt */
-  l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */
-  lu_mem GCmemtrav;  /* memory traversed by the GC */
-  lu_mem GCestimate;  /* an estimate of the non-garbage memory in use */
+  l_mem totalbytes;  /* number of bytes currently allocated - GCdebt 当前字节 分配的 - GC未返回的 */
+  l_mem GCdebt;  /* bytes allocated not yet compensated by the collector */ /* 已经分配，但是回收器未返回（未清空） */
+  lu_mem GCmemtrav;  /* memory traversed by the GC */ /* GC遍历的内存*/
+  lu_mem GCestimate;  /* an estimate of the non-garbage memory in use */ /* 正在使用的非垃圾内存 */
   stringtable strt;  /* hash table for strings */
   TValue l_registry;
   unsigned int seed;  /* randomized seed for hashes */
