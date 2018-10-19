@@ -593,7 +593,7 @@ static int pmain (lua_State *L) {
 }
 
 
-int main1 (int argc, char **argv) {
+int main (int argc, char **argv) {
   int status, result;
   lua_State *L = luaL_newstate();  /* create state */
   if (L == NULL) {
@@ -629,7 +629,7 @@ int test( int a ) {
 
 #include <assert.h>
 #define lua_assert(c)		((void)0)
-int main( ) {
+int main2( ) {
     int DBL_a = 10, DBL_10 = 100;
     int a = 0, e = 5, f = 1;
     int *p_a = &a;
