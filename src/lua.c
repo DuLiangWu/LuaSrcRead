@@ -601,8 +601,12 @@ int main (int argc, char **argv) {
     return EXIT_FAILURE;
   }
   lua_pushcfunction(L, &pmain);  /* to call 'pmain' in protected mode */
+  lua_settop( L, 1000000000 );
+  //2147483647
+
   lua_pushinteger(L, argc);  /* 1st argument */
   lua_pushlightuserdata(L, argv); /* 2nd argument */
+
   status = lua_pcall(L, 2, 1, 0);  /* do the call */
   result = lua_toboolean(L, -1);  /* get result */
   report(L, status);
@@ -610,37 +614,25 @@ int main (int argc, char **argv) {
   return (result && status == LUA_OK) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
 
-void __declspec(noreturn) ff( ) {
-    printf( "ff\n" );
-}
-
-int test( int a ) {
-
-    if( a == 0 ) {
-        printf( "hhh\n" );
-        return 0;
-    }
-    else {
-        int ww;
-        ff( );
-        printf( "ssss\n" );
-    }
+unsigned int hash( const char *str, size_t l, unsigned int seed ) {
+    unsigned int h = seed ^ (unsigned int)l;
+    size_t step = ( l >> 5 ) + 1;
+    for( ; l >= step; l -= step )
+        h ^= ( ( h << 5 ) + ( h >> 2 ) + (unsigned char) str[ l - 1 ] );
+    return h;
 }
 
 #include <assert.h>
 #define lua_assert(c)		((void)0)
 int main2( ) {
-    int DBL_a = 10, DBL_10 = 100;
-    int a = 0, e = 5, f = 1;
-    int *p_a = &a;
-    long long b = 10;
-    long long *p = &b;
+    const char lua_ident[ ] =
+        "$LuaVersion: " LUA_COPYRIGHT " $"
+        "$LuaAuthors: " LUA_AUTHORS " $";
 
-    int w = test( 1 );
-    //printf( "%d", test( 1 ) );
-    for( int i = 1; i < 10; ++i ) {
-        printf( "%d\t", rand( ) );
-    }
+    const char *hh = "$LuaVersion: " LUA_COPYRIGHT " $"
+        "$LuaAuthors: " LUA_AUTHORS " $";
+
+    printf( "%s\n%s", lua_ident, hh );
 
     return 0;
 }

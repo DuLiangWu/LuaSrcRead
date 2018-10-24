@@ -502,6 +502,7 @@ typedef struct LClosure {
 } LClosure;
 
 
+/* 闭包union */
 typedef union Closure {
   CClosure c;
   LClosure l;
@@ -568,10 +569,11 @@ typedef struct Table {
 
 /*
 ** (address of) a fixed nil value
+** nil对象的地址，所有的nil值都是这个指针？
 */
 #define luaO_nilobject		(&luaO_nilobject_)
 
-
+/* 一个常量nil值 */
 LUAI_DDEC const TValue luaO_nilobject_;
 
 /* size of buffer for 'luaO_utf8esc' function */

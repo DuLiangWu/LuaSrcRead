@@ -96,6 +96,7 @@ typedef LUAI_UACINT l_uacInt;
 
 /*
 ** assertion for checking API calls
+** 如果有需要，可以自己定义lua api调用时的检查函数，可以检查：栈是否溢出,索引坐标是否越栈
 */
 #if !defined(luai_apicheck)
 #define luai_apicheck(l,e)	lua_assert(e)

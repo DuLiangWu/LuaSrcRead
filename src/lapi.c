@@ -60,12 +60,14 @@ const char lua_ident[] =
 static TValue *index2addr (lua_State *L, int idx) {
   CallInfo *ci = L->ci;
   if (idx > 0) {
+    /* 按1~top的索引规则查找栈中的数据 */
     TValue *o = ci->func + idx;
     api_check(L, idx <= ci->top - (ci->func + 1), "unacceptable index");
     if (o >= L->top) return NONVALIDVALUE;
     else return o;
   }
   else if (!ispseudo(idx)) {  /* negative index */
+    /* 按-1~-top的索引规则查找栈中的数据 */
     api_check(L, idx != 0 && -idx <= L->top - (ci->func + 1), "invalid index");
     return L->top + idx;
   }
@@ -75,6 +77,7 @@ static TValue *index2addr (lua_State *L, int idx) {
     idx = LUA_REGISTRYINDEX - idx;
     api_check(L, idx <= MAXUPVAL + 1, "upvalue index too large");
     if (ttislcf(ci->func))  /* light C function? */
+      /* 如果这个函数是c函数 没有upvalue这种说法 */
       return NONVALIDVALUE;  /* it has no upvalues */
     else {
       CClosure *func = clCvalue(ci->func);
@@ -93,7 +96,7 @@ static void growstack (lua_State *L, void *ud) {
   luaD_growstack(L, size);
 }
 
-
+/* lua检查栈上是否有n个额外空位，没有会尝试进行栈扩容 */
 LUA_API int lua_checkstack (lua_State *L, int n) {
   int res;
   CallInfo *ci = L->ci;
@@ -114,7 +117,7 @@ LUA_API int lua_checkstack (lua_State *L, int n) {
   return res;
 }
 
-
+/* 在同一个虚拟机中，从from中移动n个数据到to线程的栈上 */
 LUA_API void lua_xmove (lua_State *from, lua_State *to, int n) {
   int i;
   if (from == to) return;
@@ -130,7 +133,7 @@ LUA_API void lua_xmove (lua_State *from, lua_State *to, int n) {
   lua_unlock(to);
 }
 
-
+/* 创建一个新的panic函数 返回老的， panic函数在全局虚拟机中 */
 LUA_API lua_CFunction lua_atpanic (lua_State *L, lua_CFunction panicf) {
   lua_CFunction old;
   lua_lock(L);
@@ -140,7 +143,7 @@ LUA_API lua_CFunction lua_atpanic (lua_State *L, lua_CFunction panicf) {
   return old;
 }
 
-
+/* 返回lua的版本 */
 LUA_API const lua_Number *lua_version (lua_State *L) {
   static const lua_Number version = LUA_VERSION_NUM;
   if (L == NULL) return &version;
@@ -157,18 +160,21 @@ LUA_API const lua_Number *lua_version (lua_State *L) {
 /*
 ** convert an acceptable stack index into an absolute index
 */
+/* 获取可接受栈索引的绝对索引，不依赖栈顶位置，也就是说 把-1~-top变成1~top的索引顺序 */
 LUA_API int lua_absindex (lua_State *L, int idx) {
   return (idx > 0 || ispseudo(idx))
          ? idx
          : cast_int(L->top - L->ci->func) + idx;
 }
 
-
+/* 获取当前栈顶的索引，也就是栈的大小 */
 LUA_API int lua_gettop (lua_State *L) {
   return cast_int(L->top - (L->ci->func + 1));
 }
 
-
+/* 将栈顶指针设置到索引位置，大于0的指引，超出原有栈顶，设置数据为nil（主要是设置为nil类型）
+** 而对于小于0的指引，理论上是不能小于-top
+*/
 LUA_API void lua_settop (lua_State *L, int idx) {
   StkId func = L->ci->func;
   lua_lock(L);
