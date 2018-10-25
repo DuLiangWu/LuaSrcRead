@@ -219,12 +219,12 @@ typedef struct lua_TValue {
 #define iscollectable(o)	(rttype(o) & BIT_ISCOLLECTABLE)
 
 
-/* Macros for internal tests */
-/* 内部测试数据 带标签的数据类型等于gc值的类型*/
+/* Macros for internal tests 内部测试宏 */
+/* 类型是否一致 带标签的数据类型等于gc值的类型*/
 #define righttt(obj)		(ttype(obj) == gcvalue(obj)->tt)
 
 /* 检查对象是否存活
-** 如果 （不是一个可收集对象，或者是一个内部测试数据） 同时 （L==NULL或者是 没有dead的数据）
+** 如果 （不是一个可收集对象，或者类型是否一致） 同时 （L==NULL或者是 没有dead的数据）
 */
 #define checkliveness(L,obj) \
 	lua_longassert(!iscollectable(obj) || \
@@ -305,8 +305,10 @@ typedef struct lua_TValue {
 */
 
 /* from stack to (same) stack */
+/* 给栈里面的数据赋值，使用的也是栈上的数据 */
 #define setobjs2s	setobj
 /* to stack (not from same stack) */
+/* 给栈里面的数据赋值，非栈里面的数据 */
 #define setobj2s	setobj
 #define setsvalue2s	setsvalue
 #define sethvalue2s	sethvalue
