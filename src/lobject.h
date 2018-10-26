@@ -331,7 +331,7 @@ typedef struct lua_TValue {
 ** =======================================================
 */
 
-
+/* 栈里面的某个索引位置的值（数据指针） */
 typedef TValue *StkId;  /* index to stack elements */
 
 

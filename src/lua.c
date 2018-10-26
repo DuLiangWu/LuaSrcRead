@@ -593,7 +593,7 @@ static int pmain (lua_State *L) {
 }
 
 
-int main (int argc, char **argv) {
+int main1 (int argc, char **argv) {
   int status, result;
   lua_State *L = luaL_newstate();  /* create state */
   if (L == NULL) {
@@ -630,6 +630,14 @@ int main2( ) {
         "$LuaAuthors: " LUA_AUTHORS " $";
 
     printf( "%s\n%s", lua_ident, hh );
+
+    return 0,1, 4;
+}
+
+int main( int argc, char **argv ) {
+    //main1( argc, argv );
+
+    printf( "\n%d", main2( ) );
 
     return 0;
 }

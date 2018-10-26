@@ -23,7 +23,7 @@
 #include "ltm.h"
 #include "lvm.h"
 
-
+/* lua所有类型的名字 */
 static const char udatatypename[] = "userdata";
 
 LUAI_DDEF const char *const luaT_typenames_[LUA_TOTALTAGS] = {

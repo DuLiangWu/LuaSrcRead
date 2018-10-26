@@ -226,7 +226,7 @@ LUA_API void lua_rotate (lua_State *L, int idx, int n) {
   lua_unlock(L);
 }
 
-
+/* 将索引位置fromidx的数据复制一份到位置toidx，原位置不受影响 */
 LUA_API void lua_copy (lua_State *L, int fromidx, int toidx) {
   TValue *fr, *to;
   lua_lock(L);
@@ -241,7 +241,7 @@ LUA_API void lua_copy (lua_State *L, int fromidx, int toidx) {
   lua_unlock(L);
 }
 
-
+/* 将索引位置inx的值复制一份到栈顶 */
 LUA_API void lua_pushvalue (lua_State *L, int idx) {
   lua_lock(L);
   setobj2s(L, L->top, index2addr(L, idx));
@@ -255,51 +255,55 @@ LUA_API void lua_pushvalue (lua_State *L, int idx) {
 ** access functions (stack -> C)
 */
 
-
+/* 获取有效索引位置的类型，不分析其变种类型 */
 LUA_API int lua_type (lua_State *L, int idx) {
   StkId o = index2addr(L, idx);
   return (isvalid(o) ? ttnov(o) : LUA_TNONE);
 }
 
-
+/* 获取一个合法type的类型名，比如：int,boolean */
+/* 详见 lua.h中的基本类型定义
+**      ltm.c中的基本类型名 luaT_typenames_
+*/
 LUA_API const char *lua_typename (lua_State *L, int t) {
   UNUSED(L);
   api_check(L, LUA_TNONE <= t && t < LUA_NUMTAGS, "invalid tag");
   return ttypename(t);
 }
 
-
+/* 当给定索引位置的值是一个C函数（LUA_TLCF,LUA_TCCL）时，返回1否则返回0 */
 LUA_API int lua_iscfunction (lua_State *L, int idx) {
   StkId o = index2addr(L, idx);
   return (ttislcf(o) || (ttisCclosure(o)));
 }
 
-
+/* 当给定索引位置的值是整数时（内部存储，因为lua对外没有整数这种类型），返回1，否则返回0*/
 LUA_API int lua_isinteger (lua_State *L, int idx) {
   StkId o = index2addr(L, idx);
   return ttisinteger(o);
 }
 
-
+/* 当给定索引位置的值是number类型 或者是可以转换为number的string时，返回1，否则返回0*/
 LUA_API int lua_isnumber (lua_State *L, int idx) {
   lua_Number n;
   const TValue *o = index2addr(L, idx);
   return tonumber(o, &n);
 }
 
-
+/* 当给定索引位置的值是string或者是可以转换为string的number时，返回1，否则返回0 */
 LUA_API int lua_isstring (lua_State *L, int idx) {
   const TValue *o = index2addr(L, idx);
   return (ttisstring(o) || cvt2str(o));
 }
 
-
+/* 当给定索引位置的值是userdata(两种LUA_TLIGHTUSERDATA, LUA_TUSERDATA)，返回1，否则返回0*/
+/* LUA_TUSERDATA 一定会有可回收标记位？ */
 LUA_API int lua_isuserdata (lua_State *L, int idx) {
   const TValue *o = index2addr(L, idx);
   return (ttisfulluserdata(o) || ttislightuserdata(o));
 }
 
-
+/* 如果索引 index1 与索引 index2 处的值 本身相等（即不调用元方法），返回 1 。 否则返回 0 。 当任何一个索引无效时，也返回 0 */
 LUA_API int lua_rawequal (lua_State *L, int index1, int index2) {
   StkId o1 = index2addr(L, index1);
   StkId o2 = index2addr(L, index2);
