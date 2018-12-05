@@ -310,12 +310,13 @@ LUA_API int lua_rawequal (lua_State *L, int index1, int index2) {
   return (isvalid(o1) && isvalid(o2)) ? luaV_rawequalobj(o1, o2) : 0;
 }
 
-
+/* 对栈顶的值进行数学操作,将栈顶的操作数弹出，并把结果压栈 */
 LUA_API void lua_arith (lua_State *L, int op) {
   lua_lock(L);
   if (op != LUA_OPUNM && op != LUA_OPBNOT)
     api_checknelems(L, 2);  /* all other operations expect two operands */
   else {  /* for unary operations, add fake 2nd operand */
+    /* 只需要一个操作数的伪造一个 */
     api_checknelems(L, 1);
     setobjs2s(L, L->top, L->top - 1);
     api_incr_top(L);
@@ -326,7 +327,7 @@ LUA_API void lua_arith (lua_State *L, int op) {
   lua_unlock(L);
 }
 
-
+/* 在给定的op运算规则下，比较两个指定索引位置的运算结果，符合条件满足1，否则返回0 */
 LUA_API int lua_compare (lua_State *L, int index1, int index2, int op) {
   StkId o1, o2;
   int i = 0;

@@ -61,6 +61,7 @@ int luaO_fb2int (int x) {
 
 /*
 ** Computes ceil(log2(x))
+** 计算log2(x)值，向上取整
 */
 int luaO_ceillog2 (unsigned int x) {
   static const lu_byte log_2[256] = {  /* log_2[i] = ceil(log2(i - 1)) */
@@ -80,6 +81,9 @@ int luaO_ceillog2 (unsigned int x) {
 }
 
 
+/* lua_Integer型数据的 算术运算
+** 为什么要转换为lua_Unsigned?带符号的整数的运算都可以转换为对应补码（转换成无符号整数，保留其比特位的值不变）的位级运算
+*/
 static lua_Integer intarith (lua_State *L, int op, lua_Integer v1,
                                                    lua_Integer v2) {
   switch (op) {
@@ -99,7 +103,7 @@ static lua_Integer intarith (lua_State *L, int op, lua_Integer v1,
   }
 }
 
-
+/* 常规的lua_Number数据类型的操作,对应的浮点运算？ */
 static lua_Number numarith (lua_State *L, int op, lua_Number v1,
                                                   lua_Number v2) {
   switch (op) {
@@ -119,13 +123,14 @@ static lua_Number numarith (lua_State *L, int op, lua_Number v1,
   }
 }
 
-
+/* 指定运算种类，对两个给定lua对象的进行对应的算术运算，不符合常规的算术运算，尝试调用对应的元方法 */
 void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
                  TValue *res) {
   switch (op) {
     case LUA_OPBAND: case LUA_OPBOR: case LUA_OPBXOR:
     case LUA_OPSHL: case LUA_OPSHR:
     case LUA_OPBNOT: {  /* operate only on integers */
+      /* 位运算，移位操作 必须是整形数据（或者可以转换为整形的数据） */
       lua_Integer i1; lua_Integer i2;
       if (tointeger(p1, &i1) && tointeger(p2, &i2)) {
         setivalue(res, intarith(L, op, i1, i2));
@@ -134,6 +139,7 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
       else break;  /* go to the end */
     }
     case LUA_OPDIV: case LUA_OPPOW: {  /* operate only on floats */
+      /* 除法和幂运算使用float */
       lua_Number n1; lua_Number n2;
       if (tonumber(p1, &n1) && tonumber(p2, &n2)) {
         setfltvalue(res, numarith(L, op, n1, n2));
@@ -142,6 +148,7 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
       else break;  /* go to the end */
     }
     default: {  /* other operations */
+      /* 其他，如果都是LUA_TNUMINT 使用整形算术运算，如果可以转换为float则使用numarith */
       lua_Number n1; lua_Number n2;
       if (ttisinteger(p1) && ttisinteger(p2)) {
         setivalue(res, intarith(L, op, ivalue(p1), ivalue(p2)));
@@ -155,11 +162,12 @@ void luaO_arith (lua_State *L, int op, const TValue *p1, const TValue *p2,
     }
   }
   /* could not perform raw operation; try metamethod */
+  /* 如果不能执行原始的算术运算，尝试元方法 */
   lua_assert(L != NULL);  /* should not fail when folding (compile time) */
   luaT_trybinTM(L, p1, p2, res, cast(TMS, (op - LUA_OPADD) + TM_ADD));
 }
 
-
+/* 计算char字符的十六进制值， 参数是不是用char会更好一些？*/
 int luaO_hexavalue (int c) {
   if (lisdigit(c)) return c - '0';
   else return (ltolower(c) - 'a') + 10;

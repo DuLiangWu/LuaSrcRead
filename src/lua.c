@@ -620,24 +620,28 @@ unsigned int hash( const char *str, size_t l, unsigned int seed ) {
 }
 
 #include <assert.h>
+#include "lobject.h"
+#include "lctype.h"
 #define lua_assert(c)		((void)0)
 int main2( ) {
-    const char lua_ident[ ] =
-        "$LuaVersion: " LUA_COPYRIGHT " $"
-        "$LuaAuthors: " LUA_AUTHORS " $";
+    int array[ 10 ] = { 0 };
+    printf( "%x\n", (unsigned int)array[ 11 ] );
 
-    const char *hh = "$LuaVersion: " LUA_COPYRIGHT " $"
-        "$LuaAuthors: " LUA_AUTHORS " $";
-
-    printf( "%s\n%s", lua_ident, hh );
-
+    for( int i = 255; i < 258; ++i ) {
+        printf( "%llx\t%d\n", luai_ctype_ + i, luai_ctype_[ i ] );
+    }
+    //printf( "%d\t%d\t%d\t%d\n", luai_ctype_[ 255 ] );
+    printf( "%d\t%d", luaO_hexavalue( 'a' ), luaO_hexavalue( '8' ) );
     return 0,1, 4;
 }
 
 int main( int argc, char **argv ) {
     //main1( argc, argv );
 
-    printf( "\n%d", main2( ) );
+    main2( );
+  
+    
+    //printf( "\n%d", main2( ) );
 
     return 0;
 }

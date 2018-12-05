@@ -193,21 +193,21 @@ LUA_API const void     *(lua_topointer) (lua_State *L, int idx);
 /*
 ** Comparison and arithmetic functions
 */
-
-#define LUA_OPADD	0	/* ORDER TM, ORDER OP */
-#define LUA_OPSUB	1
-#define LUA_OPMUL	2
-#define LUA_OPMOD	3
-#define LUA_OPPOW	4
-#define LUA_OPDIV	5
-#define LUA_OPIDIV	6
-#define LUA_OPBAND	7
-#define LUA_OPBOR	8
-#define LUA_OPBXOR	9
-#define LUA_OPSHL	10
-#define LUA_OPSHR	11
-#define LUA_OPUNM	12
-#define LUA_OPBNOT	13
+/* ORDER TM, ORDER OP */
+#define LUA_OPADD	0	/* + */
+#define LUA_OPSUB	1   /* - */
+#define LUA_OPMUL	2   /* * */
+#define LUA_OPMOD	3   /* % */
+#define LUA_OPPOW	4   /* ^ */
+#define LUA_OPDIV	5   /* / */
+#define LUA_OPIDIV	6   /* // 整除 */
+#define LUA_OPBAND	7   /* & 按位与 */
+#define LUA_OPBOR	8   /* | 按位或 */
+#define LUA_OPBXOR	9   /* ~ 异或 */
+#define LUA_OPSHL	10   /* << 左移 */
+#define LUA_OPSHR	11   /* >> 右移 */
+#define LUA_OPUNM	12   /* - 取负 */
+#define LUA_OPBNOT	13   /* ~ 按位取反 */
 
 LUA_API void  (lua_arith) (lua_State *L, int op);
 
